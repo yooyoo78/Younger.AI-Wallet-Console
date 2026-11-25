@@ -1,0 +1,6 @@
+{
+  "name": "Younger.ai Wallet Console",
+  "description": "Binance Agentic Wallet portfolio ledger, NFT & claim verifier, and Gemini AI intelligence assistant for younger.ai.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

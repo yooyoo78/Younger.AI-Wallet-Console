@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Outfit", "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans Thai", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root,
+:root[data-theme="standard"] {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-hover: #f8fafc;
+  --border-hairline: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-bg: #0f172a;
+  --accent-hover: #1e293b;
+  --accent-fg: #ffffff;
+  --highlight-text: #b45309;
+  --positive-text: #15803d;
+  --danger-bg: #fff1f2;
+  --danger-border: #fecdd3;
+  --danger-text: #9f1239;
+  --code-bg: #0f172a;
+  --code-fg: #fcd34d;
+}
+
+:root[data-theme="dark-black"] {
+  --bg-canvas: #09090b;
+  --bg-surface: #111114;
+  --bg-subtle: #18181c;
+  --bg-hover: #1c1c21;
+  --border-hairline: #27272a;
+  --border-strong: #3f3f46;
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --accent-bg: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-fg: #09090b;
+  --highlight-text: #fbbf24;
+  --positive-text: #4ade80;
+  --danger-bg: #2a1218;
+  --danger-border: #6b1d2f;
+  --danger-text: #fda4af;
+  --code-bg: #050507;
+  --code-fg: #fbbf24;
+}
+
+:root[data-theme="dark-gray"] {
+  --bg-canvas: #16191f;
+  --bg-surface: #1e232b;
+  --bg-subtle: #262c36;
+  --bg-hover: #2c333f;
+  --border-hairline: #323a46;
+  --border-strong: #475263;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent-bg: #f8fafc;
+  --accent-hover: #e2e8f0;
+  --accent-fg: #0f172a;
+  --highlight-text: #fbbf24;
+  --positive-text: #4ade80;
+  --danger-bg: #2d161d;
+  --danger-border: #6e2436;
+  --danger-text: #fda4af;
+  --code-bg: #111419;
+  --code-fg: #fcd34d;
+}
+
+:root[data-theme="dark-brown"] {
+  --bg-canvas: #16110e;
+  --bg-surface: #201915;
+  --bg-subtle: #2a211b;
+  --bg-hover: #322720;
+  --border-hairline: #3b2e26;
+  --border-strong: #524035;
+  --text-primary: #f7f1eb;
+  --text-secondary: #d6c7ba;
+  --text-muted: #a89585;
+  --accent-bg: #d97706;
+  --accent-hover: #b45309;
+  --accent-fg: #fffbeb;
+  --highlight-text: #f59e0b;
+  --positive-text: #6ee7b7;
+  --danger-bg: #311717;
+  --danger-border: #6f2a2a;
+  --danger-text: #fda4af;
+  --code-bg: #120d0a;
+  --code-fg: #fcd34d;
+}
+
+:root[data-theme="soft-ivory"] {
+  --bg-canvas: #fbf8f3;
+  --bg-surface: #fffdf9;
+  --bg-subtle: #f3ede2;
+  --bg-hover: #f7f2e9;
+  --border-hairline: #e4dbcd;
+  --border-strong: #d1c4b1;
+  --text-primary: #29221b;
+  --text-secondary: #5c5044;
+  --text-muted: #7d6e5f;
+  --accent-bg: #78350f;
+  --accent-hover: #5c280b;
+  --accent-fg: #fffbeb;
+  --highlight-text: #b45309;
+  --positive-text: #15803d;
+  --danger-bg: #fff1f2;
+  --danger-border: #fecdd3;
+  --danger-text: #9f1239;
+  --code-bg: #29221b;
+  --code-fg: #fcd34d;
+}
+
+:root[data-theme="soft-mist"] {
+  --bg-canvas: #eef2f6;
+  --bg-surface: #f9fbfd;
+  --bg-subtle: #e4eaf1;
+  --bg-hover: #edf2f7;
+  --border-hairline: #d3dce6;
+  --border-strong: #b8c5d4;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-bg: #334155;
+  --accent-hover: #1e293b;
+  --accent-fg: #ffffff;
+  --highlight-text: #b45309;
+  --positive-text: #15803d;
+  --danger-bg: #fff1f2;
+  --danger-border: #fecdd3;
+  --danger-text: #9f1239;
+  --code-bg: #1e293b;
+  --code-fg: #fcd34d;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  body {
+    transition: none;
+  }
+}
