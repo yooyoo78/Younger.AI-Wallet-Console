@@ -91,6 +91,12 @@ async function startServer() {
         ? req.body.evmAddress.trim()
         : "0x22e1eB91F953A5D5Def8da8eFA7fa49c97dC89FE";
 
+    const rawRpcUrl =
+      typeof req.body?.rpcUrl === "string" ? req.body.rpcUrl.trim() : "";
+    const rpcUrl = /^https:\/\/[a-zA-Z0-9.-]+(:\d+)?(\/.*)?$/.test(rawRpcUrl)
+      ? rawRpcUrl
+      : "https://bsc-dataseed.binance.org/";
+
     if (!/^0x[a-fA-F0-9]{40}$/.test(evmAddress)) {
       res.status(400).json({ error: "รูปแบบ EVM Address ไม่ถูกต้อง" });
       return;
@@ -100,7 +106,7 @@ async function startServer() {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4500);
-      const rpcResponse = await fetch("https://bsc-dataseed.binance.org/", {
+      const rpcResponse = await fetch(rpcUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,6 +161,8 @@ async function startServer() {
   app.post("/api/wallet/bsc-tx-history", async (req, res) => {
     const rawLimit = Number(req.body?.limit);
     const limit = Number.isFinite(rawLimit) && rawLimit > 0 && rawLimit <= 100 ? Math.floor(rawLimit) : 10;
+    const rawChainId = typeof req.body?.chainId === "string" ? req.body.chainId.trim() : "56";
+    const chainId = /^[a-zA-Z0-9_]{1,16}$/.test(rawChainId) ? rawChainId : "56";
 
     try {
       const env = { ...process.env };
@@ -164,7 +172,7 @@ async function startServer() {
 
       const { stdout } = await execFileAsync(
         "baw",
-        ["wallet", "tx-history", "--binanceChainId", "56", "--size", String(limit), "--type", "all", "--json"],
+        ["wallet", "tx-history", "--binanceChainId", chainId, "--size", String(limit), "--type", "all", "--json"],
         { env, timeout: 6000, maxBuffer: 5 * 1024 * 1024 }
       );
 

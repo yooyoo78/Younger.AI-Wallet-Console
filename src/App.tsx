@@ -3,26 +3,23 @@ import { AssetLedger } from "./components/AssetLedger";
 import { CliScriptsAndMonitor } from "./components/CliScriptsAndMonitor";
 import { GeminiChatbot } from "./components/GeminiChatbot";
 import { NftAndClaimsSection } from "./components/NftAndClaimsSection";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PortfolioAuditPanel } from "./components/PortfolioAuditPanel";
 import { SideMenuDrawer } from "./components/SideMenuDrawer";
 import { TopBar, WorkspaceTabId } from "./components/TopBar";
 import { WalletOverview } from "./components/WalletOverview";
+import { WalletSettingsPanel } from "./components/WalletSettingsPanel";
 import { THEME_OPTIONS, ThemeId } from "./data/themes";
 import {
+  DEFAULT_WALLET_SETTINGS,
   INITIAL_WALLET_PROFILE,
   PortfolioAuditResult,
+  WalletConnectionSettings,
   WalletProfile,
 } from "./data/walletSnapshot";
 
 const THEME_STORAGE_KEY = "younger_wallet_theme";
-
-const SECTION_LABELS: Record<WorkspaceTabId, string> = {
-  overview: "ภาพรวมและวิเคราะห์ AI",
-  assets: "สินทรัพย์โทเคน (11)",
-  claims: "NFT และเคลมรางวัล (5)",
-  cli: "สคริปต์ CLI และติดตาม BSC",
-  chat: "ผู้ช่วยวิเคราะห์ Gemini AI",
-};
+const SETTINGS_STORAGE_KEY = "younger_wallet_settings";
 
 export default function App() {
   const [theme, setTheme] = useState<ThemeId>(() => {
@@ -34,11 +31,30 @@ export default function App() {
     return "standard";
   });
 
+  const [settings, setSettings] = useState<WalletConnectionSettings>(() => {
+    if (typeof window === "undefined") return DEFAULT_WALLET_SETTINGS;
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        return { ...DEFAULT_WALLET_SETTINGS, ...JSON.parse(raw) };
+      }
+    } catch {
+      // Ignore invalid localStorage payload
+    }
+    return DEFAULT_WALLET_SETTINGS;
+  });
+
   const [activeTab, setActiveTab] = useState<WorkspaceTabId>("overview");
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const [wallet, setWallet] = useState<WalletProfile>(INITIAL_WALLET_PROFILE);
+  const [wallet, setWallet] = useState<WalletProfile>(() => ({
+    ...INITIAL_WALLET_PROFILE,
+    agentId: settings.agentId,
+    evmAddress: settings.evmAddress,
+    solanaAddress: settings.solanaAddress,
+  }));
+
   const [isRefreshingRpc, setIsRefreshingRpc] = useState(false);
   const [rpcFeedback, setRpcFeedback] = useState<{
     message: string;
@@ -66,13 +82,31 @@ export default function App() {
     }
   }, [theme]);
 
+  const handleSaveSettings = (next: WalletConnectionSettings) => {
+    setSettings(next);
+    setWallet((prev) => ({
+      ...prev,
+      agentId: next.agentId,
+      evmAddress: next.evmAddress,
+      solanaAddress: next.solanaAddress,
+    }));
+    try {
+      window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore storage error
+    }
+  };
+
   const handleRefreshRpc = async () => {
     setIsRefreshingRpc(true);
     try {
       const response = await fetch("/api/wallet/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ evmAddress: wallet.evmAddress }),
+        body: JSON.stringify({
+          evmAddress: settings.evmAddress,
+          rpcUrl: settings.bscRpcUrl,
+        }),
       });
       const data = await response.json();
 
@@ -142,18 +176,13 @@ export default function App() {
     handleOpenChat();
   };
 
-  const activeThemeLabel =
-    THEME_OPTIONS.find((t) => t.id === theme)?.label || "ธรรมดา (คลาสสิก)";
-
   return (
     <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] flex flex-col">
       <TopBar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectOverview={() => setActiveTab("overview")}
         onOpenSideMenu={() => setIsSideMenuOpen(true)}
         onRunAudit={handleRunAudit}
         isAuditing={isAuditing}
-        onOpenChat={handleOpenChat}
       />
 
       <SideMenuDrawer
@@ -167,33 +196,7 @@ export default function App() {
         agentId={wallet.agentId}
       />
 
-      <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-8 space-y-6">
-        {/* Clean Contextual Breadcrumb Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsSideMenuOpen(true)}
-              className="hover:text-[var(--text-primary)] underline-offset-4 hover:underline cursor-pointer"
-            >
-              เมนูทั้งหมด
-            </button>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-[var(--text-primary)]">
-              {SECTION_LABELS[activeTab]}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsSideMenuOpen(true)}
-            className="hover:text-[var(--text-primary)] cursor-pointer"
-          >
-            ธีม: {activeThemeLabel}
-          </button>
-        </div>
-
-        {/* Focused Single-View Content */}
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {activeTab === "overview" && (
           <div className="space-y-6">
             <WalletOverview
@@ -222,6 +225,19 @@ export default function App() {
           />
         )}
 
+        {activeTab === "settings" && (
+          <WalletSettingsPanel
+            settings={settings}
+            wallet={wallet}
+            onSaveSettings={handleSaveSettings}
+            onRefreshRpc={handleRefreshRpc}
+            isRefreshingRpc={isRefreshingRpc}
+            onRunAudit={handleRunAudit}
+            isAuditing={isAuditing}
+            onGoToCliMonitor={() => setActiveTab("cli")}
+          />
+        )}
+
         {activeTab === "cli" && <CliScriptsAndMonitor wallet={wallet} />}
       </main>
 
@@ -233,8 +249,10 @@ export default function App() {
         chatInputRef={chatInputRef}
       />
 
+      <OfflineIndicator />
+
       <footer className="border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] mt-8">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-6 py-5 text-xs text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 sm:px-6 py-5 text-xs text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
           <span>Younger.ai Wallet Console · BNB Smart Chain & Solana</span>
           <span>ตรวจสอบข้อมูลและคำสั่ง baw CLI ก่อนเซ็นธุรกรรมทุกครั้ง</span>
         </div>

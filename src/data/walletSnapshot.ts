@@ -67,6 +67,24 @@ export interface ChatMessage {
 
 export type ChatRoleId = "analyst" | "security" | "strategist";
 
+export interface WalletConnectionSettings {
+  agentId: string;
+  evmAddress: string;
+  solanaAddress: string;
+  bscRpcUrl: string;
+  defaultChainId: string;
+  useEnvProxy: boolean;
+}
+
+export const DEFAULT_WALLET_SETTINGS: WalletConnectionSettings = {
+  agentId: "younger.ai",
+  evmAddress: "0x22e1eB91F953A5D5Def8da8eFA7fa49c97dC89FE",
+  solanaAddress: "34rWyaBFskzf53E48Btpu2DdYeWVmMETzb7pT5XvsZtN",
+  bscRpcUrl: "https://bsc-dataseed.binance.org/",
+  defaultChainId: "56",
+  useEnvProxy: true,
+};
+
 export const INITIAL_WALLET_PROFILE: WalletProfile = {
   agentId: "younger.ai",
   agentIdClaimed: true,

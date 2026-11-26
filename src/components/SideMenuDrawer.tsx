@@ -6,11 +6,13 @@ import {
   LayoutDashboard,
   MessageSquare,
   Palette,
+  Settings2,
   ShieldCheck,
   Terminal,
   X,
 } from "lucide-react";
 import { THEME_OPTIONS, ThemeId, ThemeToneGroup } from "../data/themes";
+import { PWAInstallButton } from "./PWAInstallButton";
 import { WorkspaceTabId } from "./TopBar";
 
 interface SideMenuDrawerProps {
@@ -60,8 +62,14 @@ const NAV_GROUPS: {
   },
   {
     id: "tools",
-    title: "เครื่องมือและระบบอัตโนมัติ",
+    title: "การตั้งค่า คำสั่ง และผู้ช่วย",
     items: [
+      {
+        id: "settings",
+        label: "ตั้งค่าเชื่อมกระเป๋า & ปุ่มคำสั่ง",
+        subtitle: "แก้ไข Address, RPC และปุ่มสั่งงาน baw CLI",
+        icon: Settings2,
+      },
       {
         id: "cli",
         label: "สคริปต์ CLI และติดตาม BSC",
@@ -97,7 +105,7 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     portfolio: true,
     tools: true,
-    themes: true,
+    themes: false,
   });
 
   useEffect(() => {
@@ -117,22 +125,20 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/45 backdrop-blur-[1px]"
+        className="fixed inset-0 bg-black/50 backdrop-blur-[1px]"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Side Drawer Panel */}
       <aside
-        aria-label="เมนูนำทางและตั้งค่าธีม"
+        aria-label="เมนูนำทางและตั้งค่า"
         className="relative z-10 flex h-full w-full max-w-[330px] flex-col border-r border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-[var(--border-hairline)] px-5 py-4">
           <div>
             <div className="font-display text-base font-bold text-[var(--text-primary)]">
-              เมนูและตัวเลือก
+              Younger.ai
             </div>
             <div className="font-mono text-xs text-[var(--text-muted)]">
               Agent ID: {agentId}
@@ -142,14 +148,13 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
             type="button"
             onClick={onClose}
             aria-label="ปิดเมนูด้านข้าง"
-            className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
-          {/* Navigation Group Listings */}
           {NAV_GROUPS.map((group) => {
             const isExpanded = expandedGroups[group.id] ?? true;
             return (
@@ -157,13 +162,13 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.id)}
-                  className="flex w-full items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                  className="flex min-h-[40px] w-full items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
                   <span>{group.title}</span>
                   {isExpanded ? (
-                    <ChevronDown className="h-3.5 w-3.5" />
+                    <ChevronDown className="h-4 w-4" />
                   ) : (
-                    <ChevronRight className="h-3.5 w-3.5" />
+                    <ChevronRight className="h-4 w-4" />
                   )}
                 </button>
 
@@ -185,7 +190,7 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
                               onClose();
                             }
                           }}
-                          className={`flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                          className={`flex min-h-[48px] w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer ${
                             isActive
                               ? "bg-[var(--accent-bg)] text-[var(--accent-fg)]"
                               : "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]"
@@ -204,9 +209,7 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
                             </div>
                             <div
                               className={`text-xs mt-0.5 leading-snug ${
-                                isActive
-                                  ? "opacity-80"
-                                  : "text-[var(--text-muted)]"
+                                isActive ? "opacity-80" : "text-[var(--text-muted)]"
                               }`}
                             >
                               {item.subtitle}
@@ -221,21 +224,20 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
             );
           })}
 
-          {/* Theme Color Group Listings */}
           <div className="border-t border-[var(--border-hairline)] pt-4 space-y-2">
             <button
               type="button"
               onClick={() => toggleGroup("themes")}
-              className="flex w-full items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="flex min-h-[40px] w-full items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
               <span className="inline-flex items-center gap-1.5">
                 <Palette className="h-3.5 w-3.5" />
                 <span>ธีมสีหน้าจอ (UI Theme)</span>
               </span>
               {expandedGroups.themes ? (
-                <ChevronDown className="h-3.5 w-3.5" />
+                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-4 w-4" />
               )}
             </button>
 
@@ -257,7 +259,7 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
                               type="button"
                               onClick={() => onSelectTheme(option.id)}
                               aria-pressed={isSelected}
-                              className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer ${
+                              className={`flex min-h-[44px] w-full items-center justify-between rounded-xl border px-3 py-2 text-xs font-medium transition-colors cursor-pointer ${
                                 isSelected
                                   ? "border-[var(--accent-bg)] bg-[var(--accent-bg)] text-[var(--accent-fg)]"
                                   : "border-[var(--border-hairline)] bg-[var(--bg-subtle)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
@@ -284,6 +286,10 @@ export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
               </div>
             )}
           </div>
+        </div>
+
+        <div className="border-t border-[var(--border-hairline)] p-4">
+          <PWAInstallButton variant="drawer" />
         </div>
       </aside>
     </div>
